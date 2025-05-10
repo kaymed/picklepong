@@ -2,7 +2,7 @@
 
 An 8-bit TRON-inspired version of the classic Pickleball Pong game.
 
-![TRON Pickleball Pong](tron_pickleball_screenshot.png)
+![TRON Pickleball Pong](picklepong_screenshot.png)
 
 ## Game Features
 
