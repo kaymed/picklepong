@@ -7,15 +7,16 @@ const BALL_SIZE = 16;
 const BALL_SPEED = 7;
 const PADDLE_SPEED = 8;
 
-// TRON-inspired Color Scheme
-const BACKGROUND_COLOR = "rgb(0, 0, 20)";       // Very dark blue
-const GRID_COLOR = "rgb(0, 50, 80)";            // Dark blue for grid
-const GRID_BRIGHT_COLOR = "rgb(0, 100, 160)";   // Brighter blue for grid
-const NEON_BLUE = "rgb(0, 200, 255)";           // Bright cyan/blue
-const NEON_ORANGE = "rgb(255, 120, 0)";         // Bright orange
-const NEON_PINK = "rgb(255, 0, 150)";           // Bright pink
-const NEON_GREEN = "rgb(0, 255, 100)";          // Bright green
-const TEXT_COLOR = "rgb(200, 200, 255)";        // Light blue for text
+// Pickleball Court Color Scheme
+const BACKGROUND_COLOR = "#3773b3";       // Blue background color
+const COURT_COLOR = "#008ddf";            // Blue court base
+const LINE_COLOR = "#ffffff";             // White court lines
+const KITCHEN_COLOR = "rgba(255, 255, 255, 0.15)"; // Non-volley zone (kitchen)
+const NEON_BLUE = "rgb(0, 200, 255)";     // Player 1 color
+const NEON_RED = "#f50538";   // Player 2 color
+const NEON_PINK = "rgb(255, 0, 150)";     // Accent color
+const NEON_GREEN = "#bde765";             // Ball color (pickleball yellow-green)
+const TEXT_COLOR = "rgb(255, 255, 255)";  // White text
 
 // Game variables
 let canvas, ctx;
@@ -54,7 +55,7 @@ function initGame() {
         y: HEIGHT / 2 - PADDLE_HEIGHT / 2,
         width: PADDLE_WIDTH,
         height: PADDLE_HEIGHT,
-        color: NEON_BLUE,
+        color: NEON_RED,
         score: 0,
         speed: PADDLE_SPEED
     };
@@ -64,7 +65,7 @@ function initGame() {
         y: HEIGHT / 2 - PADDLE_HEIGHT / 2,
         width: PADDLE_WIDTH,
         height: PADDLE_HEIGHT,
-        color: NEON_ORANGE,
+        color: NEON_PINK,
         score: 0,
         speed: PADDLE_SPEED
     };
@@ -98,7 +99,7 @@ function gameLoop(timestamp) {
     ctx.fillStyle = BACKGROUND_COLOR;
     ctx.fillRect(0, 0, WIDTH, HEIGHT);
     
-    // Draw grid
+    // Draw court
     drawGrid();
     
     // Update game state
@@ -296,58 +297,77 @@ function updateParticles() {
     }
 }
 
-// Draw the TRON-style grid
+// Draw the pickleball court
 function drawGrid() {
-    // Draw darker background grid
-    ctx.strokeStyle = GRID_COLOR;
-    ctx.lineWidth = 1;
+    // Fill the background with background color
+    ctx.fillStyle = BACKGROUND_COLOR;
+    ctx.fillRect(0, 0, WIDTH, HEIGHT);
     
-    const cellSize = 40;
+    // Draw the court with court color
+    ctx.fillStyle = COURT_COLOR;
+    ctx.fillRect(50, 50, WIDTH - 100, HEIGHT - 100);
     
-    // Draw vertical lines
-    for (let x = 0; x <= WIDTH; x += cellSize) {
-        ctx.beginPath();
-        ctx.moveTo(x, 0);
-        ctx.lineTo(x, HEIGHT);
-        ctx.stroke();
-    }
+    // Set line style
+    ctx.strokeStyle = LINE_COLOR;
+    ctx.lineWidth = 3;
     
-    // Draw horizontal lines
-    for (let y = 0; y <= HEIGHT; y += cellSize) {
-        ctx.beginPath();
-        ctx.moveTo(0, y);
-        ctx.lineTo(WIDTH, y);
-        ctx.stroke();
-    }
+    // Draw court outline
+    ctx.strokeRect(50, 50, WIDTH - 100, HEIGHT - 100);
     
-    // Draw brighter main grid lines
-    ctx.strokeStyle = GRID_BRIGHT_COLOR;
-    ctx.lineWidth = 2;
+    // Draw center line (net)
+    ctx.beginPath();
+    ctx.moveTo(WIDTH / 2, 50);
+    ctx.lineTo(WIDTH / 2, HEIGHT - 50);
+    ctx.stroke();
     
-    // Draw vertical main lines
-    for (let x = 0; x <= WIDTH; x += cellSize * 4) {
-        ctx.beginPath();
-        ctx.moveTo(x, 0);
-        ctx.lineTo(x, HEIGHT);
-        ctx.stroke();
-    }
+    // Draw kitchen lines (non-volley zone) - 7 feet from net on each side
+    const kitchenWidth = 120; // Scaled for our court size
     
-    // Draw horizontal main lines
-    for (let y = 0; y <= HEIGHT; y += cellSize * 4) {
-        ctx.beginPath();
-        ctx.moveTo(0, y);
-        ctx.lineTo(WIDTH, y);
-        ctx.stroke();
-    }
+    // Left kitchen
+    ctx.beginPath();
+    ctx.moveTo(WIDTH / 2 - kitchenWidth, 50);
+    ctx.lineTo(WIDTH / 2 - kitchenWidth, HEIGHT - 50);
+    ctx.stroke();
     
-    // Draw center line with segments
-    ctx.strokeStyle = NEON_PINK;
+    // Right kitchen
+    ctx.beginPath();
+    ctx.moveTo(WIDTH / 2 + kitchenWidth, 50);
+    ctx.lineTo(WIDTH / 2 + kitchenWidth, HEIGHT - 50);
+    ctx.stroke();
+    
+    // Fill kitchen areas with slightly different color
+    ctx.fillStyle = KITCHEN_COLOR;
+    ctx.fillRect(WIDTH / 2 - kitchenWidth, 50, kitchenWidth, HEIGHT - 100);
+    ctx.fillRect(WIDTH / 2, 50, kitchenWidth, HEIGHT - 100);
+    
+    // Draw service lines
+    const serviceLineY = HEIGHT / 2;
+    
+    // Left service line
+    ctx.beginPath();
+    ctx.moveTo(50, serviceLineY);
+    ctx.lineTo(WIDTH / 2 - kitchenWidth, serviceLineY);
+    ctx.stroke();
+    
+    // Right service line
+    ctx.beginPath();
+    ctx.moveTo(WIDTH / 2 + kitchenWidth, serviceLineY);
+    ctx.lineTo(WIDTH - 50, serviceLineY);
+    ctx.stroke();
+    
+    // Draw centerline for service boxes
+    const leftCenterX = 50 + (WIDTH / 2 - kitchenWidth - 50) / 2;
+    const rightCenterX = WIDTH / 2 + kitchenWidth + (WIDTH - 50 - (WIDTH / 2 + kitchenWidth)) / 2;
+    
+    
+    // Draw net with segments
+    ctx.strokeStyle = "#ffffff";
     ctx.lineWidth = 4;
     
-    const segmentHeight = 20;
-    const gapHeight = 10;
+    const segmentHeight = 15;
+    const gapHeight = 8;
     
-    for (let y = 0; y < HEIGHT; y += segmentHeight + gapHeight) {
+    for (let y = 55; y < HEIGHT - 55; y += segmentHeight + gapHeight) {
         ctx.beginPath();
         ctx.moveTo(WIDTH / 2, y);
         ctx.lineTo(WIDTH / 2, y + segmentHeight);
@@ -374,21 +394,22 @@ function draw() {
     drawTitle();
 }
 
-// Draw a paddle with glow effect
+// Draw a paddle with glow effect (pickleball paddle style)
 function drawPaddle(paddle) {
     // Draw glow effect
     ctx.shadowBlur = 10;
     ctx.shadowColor = paddle.color;
     
-    // Draw paddle
+    // Draw paddle base (rectangular shape)
     ctx.fillStyle = paddle.color;
     ctx.fillRect(paddle.x, paddle.y, paddle.width, paddle.height);
     
-    // Draw paddle details (8-bit style segments)
-    const segmentHeight = paddle.height / 8;
+    // Draw paddle grip pattern (pickleball paddle texture)
+    const segmentHeight = paddle.height / 12;
     ctx.fillStyle = shadeColor(paddle.color, -30);
     
-    for (let i = 0; i < 8; i += 2) {
+    // Draw grip pattern (honeycomb-like texture)
+    for (let i = 0; i < 12; i += 2) {
         ctx.fillRect(
             paddle.x + 2,
             paddle.y + i * segmentHeight,
@@ -399,12 +420,21 @@ function drawPaddle(paddle) {
     
     // Draw paddle handle
     const handleWidth = 20;
-    const handleHeight = 25;
+    const handleHeight = 30;
     const handleX = paddle.x === 50 ? paddle.x + paddle.width : paddle.x - handleWidth;
     const handleY = paddle.y + paddle.height / 2 - handleHeight / 2;
     
+    // Handle base
     ctx.fillStyle = "rgb(139, 69, 19)";
     ctx.fillRect(handleX, handleY, handleWidth, handleHeight);
+    
+    // Handle grip
+    ctx.fillStyle = "rgb(80, 40, 10)";
+    const gripWidth = handleWidth - 6;
+    const gripHeight = handleHeight - 10;
+    const gripX = handleX + (handleWidth - gripWidth) / 2;
+    const gripY = handleY + (handleHeight - gripHeight) / 2;
+    ctx.fillRect(gripX, gripY, gripWidth, gripHeight);
     
     // Reset shadow
     ctx.shadowBlur = 0;
@@ -418,23 +448,30 @@ function drawBall() {
         const alpha = (i + 1) / ball.trail.length;
         
         ctx.fillStyle = `rgba(0, 255, 100, ${alpha * 0.5})`;
-        ctx.fillRect(
-            ball.trail[i].x - size/2,
-            ball.trail[i].y - size/2,
-            size,
-            size
-        );
+        ctx.beginPath();
+        ctx.arc(ball.trail[i].x, ball.trail[i].y, size/2, 0, Math.PI * 2);
+        ctx.fill();
     }
     
     // Draw ball with glow
     ctx.shadowBlur = 15;
     ctx.shadowColor = NEON_GREEN;
     ctx.fillStyle = NEON_GREEN;
-    ctx.fillRect(ball.x, ball.y, ball.width, ball.height);
     
-    // Draw ball details
+    // Draw circular ball
+    const centerX = ball.x + ball.width/2;
+    const centerY = ball.y + ball.height/2;
+    const radius = ball.width/2;
+    
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Draw ball details (inner circle)
     ctx.fillStyle = shadeColor(NEON_GREEN, -30);
-    ctx.fillRect(ball.x + 2, ball.y + 2, ball.width - 4, ball.height - 4);
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, radius * 0.7, 0, Math.PI * 2);
+    ctx.fill();
     
     // Reset shadow
     ctx.shadowBlur = 0;
@@ -445,7 +482,9 @@ function drawParticles() {
     for (const p of particles) {
         const alpha = p.life / 30;
         ctx.fillStyle = colorWithAlpha(p.color, alpha);
-        ctx.fillRect(p.x - p.size/2, p.y - p.size/2, p.size, p.size);
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size/2, 0, Math.PI * 2);
+        ctx.fill();
     }
 }
 
@@ -455,12 +494,17 @@ function drawScore() {
     const boxSize = 60;
     
     // Player 1 score box
-    ctx.strokeStyle = NEON_BLUE;
+    ctx.fillStyle = "rgba(0, 0, 60, 0.7)";
+    ctx.fillRect(WIDTH / 4 - boxSize/2, 20, boxSize, boxSize);
+    ctx.strokeStyle = NEON_RED;
     ctx.lineWidth = 3;
     ctx.strokeRect(WIDTH / 4 - boxSize/2, 20, boxSize, boxSize);
     
     // Player 2 score box
-    ctx.strokeStyle = NEON_ORANGE;
+    ctx.fillStyle = "rgba(0, 0, 60, 0.7)";
+    ctx.fillRect(3 * WIDTH / 4 - boxSize/2, 20, boxSize, boxSize);
+    ctx.strokeStyle = NEON_PINK;
+    ctx.lineWidth = 3;
     ctx.strokeRect(3 * WIDTH / 4 - boxSize/2, 20, boxSize, boxSize);
     
     // Draw scores
@@ -469,11 +513,11 @@ function drawScore() {
     ctx.textBaseline = "middle";
     
     // Player 1 score
-    ctx.fillStyle = NEON_BLUE;
+    ctx.fillStyle = NEON_RED;
     ctx.fillText(paddle1.score.toString(), WIDTH / 4, 20 + boxSize/2);
     
     // Player 2 score
-    ctx.fillStyle = NEON_ORANGE;
+    ctx.fillStyle = NEON_PINK;
     ctx.fillText(paddle2.score.toString(), 3 * WIDTH / 4, 20 + boxSize/2);
 }
 
@@ -487,30 +531,29 @@ function drawInstructions() {
         const boxY = HEIGHT / 2 + 50;
         
         // Box background
-        ctx.fillStyle = BACKGROUND_COLOR;
+        ctx.fillStyle = "rgba(0, 0, 60, 0.7)";
         ctx.fillRect(boxX, boxY, boxWidth, boxHeight);
         
         // Box border
-        ctx.strokeStyle = NEON_PINK;
+        ctx.strokeStyle = LINE_COLOR;
         ctx.lineWidth = 2;
         ctx.strokeRect(boxX, boxY, boxWidth, boxHeight);
         
-        // Scanline effect
-        ctx.strokeStyle = `rgba(255, 0, 150, 0.3)`;
+        // Dashed line effect like pickleball court markings
+        ctx.strokeStyle = `rgba(255, 255, 255, 0.3)`;
         ctx.lineWidth = 1;
-        for (let y = boxY + 2; y < boxY + boxHeight - 2; y += 4) {
-            ctx.beginPath();
-            ctx.moveTo(boxX + 2, y);
-            ctx.lineTo(boxX + boxWidth - 2, y);
-            ctx.stroke();
-        }
+        ctx.setLineDash([4, 4]);
+        ctx.beginPath();
+        ctx.rect(boxX + 4, boxY + 4, boxWidth - 8, boxHeight - 8);
+        ctx.stroke();
+        ctx.setLineDash([]);
         
         // Instruction text
         ctx.font = "20px 'Courier New', monospace";
         ctx.fillStyle = TEXT_COLOR;
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
-        ctx.fillText("PRESS SPACE TO LAUNCH", WIDTH / 2, boxY + boxHeight/2);
+        ctx.fillText("PRESS SPACE TO SERVE", WIDTH / 2, boxY + boxHeight/2);
     }
 }
 
@@ -518,10 +561,10 @@ function drawInstructions() {
 function drawControls() {
     // Draw control box
     const boxHeight = 30;
-    ctx.fillStyle = BACKGROUND_COLOR;
+    ctx.fillStyle = "rgba(0, 0, 60, 0.7)";
     ctx.fillRect(10, HEIGHT - boxHeight - 10, WIDTH - 20, boxHeight);
     
-    ctx.strokeStyle = GRID_BRIGHT_COLOR;
+    ctx.strokeStyle = LINE_COLOR;
     ctx.lineWidth = 2;
     ctx.strokeRect(10, HEIGHT - boxHeight - 10, WIDTH - 20, boxHeight);
     
@@ -530,10 +573,10 @@ function drawControls() {
     ctx.fillStyle = TEXT_COLOR;
     ctx.textAlign = "left";
     ctx.textBaseline = "middle";
-    ctx.fillText("P1: W/S", 30, HEIGHT - boxHeight/2 - 10);
+    ctx.fillText("PLAYER 1: W/S", 30, HEIGHT - boxHeight/2 - 10);
     
     ctx.textAlign = "center";
-    ctx.fillText("P2: UP/DOWN", WIDTH / 2, HEIGHT - boxHeight/2 - 10);
+    ctx.fillText("PLAYER 2: UP/DOWN", WIDTH / 2, HEIGHT - boxHeight/2 - 10);
     
     ctx.textAlign = "right";
     ctx.fillText("QUIT: ESC", WIDTH - 30, HEIGHT - boxHeight/2 - 10);
@@ -541,7 +584,7 @@ function drawControls() {
 
 // Draw title
 function drawTitle() {
-    const title = "TRON PICKLEBALL";
+    const title = "PICKLEBALL PONG";
     ctx.font = "bold 36px 'Courier New', monospace";
     const titleWidth = ctx.measureText(title).width;
     
@@ -552,18 +595,18 @@ function drawTitle() {
     const boxY = 10;
     
     // Box background
-    ctx.fillStyle = BACKGROUND_COLOR;
+    ctx.fillStyle = "rgba(0, 0, 60, 0.7)";
     ctx.fillRect(boxX, boxY, boxWidth, boxHeight);
     
     // Box border
-    ctx.strokeStyle = NEON_PINK;
+    ctx.strokeStyle = LINE_COLOR;
     ctx.lineWidth = 3;
     ctx.strokeRect(boxX, boxY, boxWidth, boxHeight);
     
-    // Scanline effect
-    ctx.strokeStyle = `rgba(255, 0, 150, 0.3)`;
+    // Pickleball pattern in background
+    ctx.strokeStyle = `rgba(255, 255, 255, 0.2)`;
     ctx.lineWidth = 1;
-    for (let y = boxY + 4; y < boxY + boxHeight - 4; y += 4) {
+    for (let y = boxY + 4; y < boxY + boxHeight - 4; y += 8) {
         ctx.beginPath();
         ctx.moveTo(boxX + 3, y);
         ctx.lineTo(boxX + boxWidth - 3, y);
@@ -572,8 +615,8 @@ function drawTitle() {
     
     // Title text with glow
     ctx.shadowBlur = 10;
-    ctx.shadowColor = NEON_PINK;
-    ctx.fillStyle = NEON_PINK;
+    ctx.shadowColor = "#ffffff";
+    ctx.fillStyle = "#ffffff";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     ctx.fillText(title, WIDTH / 2, boxY + boxHeight/2);
